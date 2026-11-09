@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تفسیر نظام‌مند ریتم‌های سینوسی — درس تعاملی</title>
+<style>
+  /* ---------- فونت IRANYekanXVFaNumVF ---------- */
+  @font-face{
+    font-family:'IRANYekanXVFaNumVF';
+    src:url('https://raw.githubusercontent.com/mehajinezhad/ECG_Axis_Interpretation/main/IRANYekanXVFaNumVF.ttf') format('truetype');
+    font-weight:100 900;
+    font-style:normal;
+    font-display:swap;
+  }
+
+  :root{
+    --bg:#eef2f6; --card:#ffffff; --ink:#16232f; --muted:#5b6b7b;
+    --brand:#0f766e; --brand2:#0d9488; --line:#e2e8f0;
+    --ok:#16a34a; --bad:#dc2626; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'IRANYekanXVFaNumVF','Vazirmatn','IRANSans','Segoe UI',Tahoma,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.9;
+    direction:rtl; -webkit-text-size-adjust:100%;
+  }
+
+  /* ---------- بنر بالای صفحه ---------- */
+  .hero-banner{
+    background:linear-gradient(135deg,#134e4a,#0f766e 55%,#0d9488);
+    color:#fff; text-align:center; padding:22px 16px;
+    box-shadow:0 4px 14px -6px rgba(0,0,0,.28);
+    border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .hero-banner .hero-text{
+    display:block; font-size:1.55rem; font-weight:900;
+    letter-spacing:-.01em; line-height:1.45;
+    text-shadow:0 1px 2px rgba(0,0,0,.18);
+  }
+  @media (max-width:640px){
+    .hero-banner{padding:14px 10px}
+    .hero-banner .hero-text{font-size:1.05rem}
+  }
+
+  /* ---------- Header sticky ---------- */
+  .top{
+    position:sticky; top:0; z-index:60;
+    background:linear-gradient(135deg,#0f766e,#0d9488 60%,#14b8a6);
+    color:#fff; box-shadow:0 2px 14px rgba(0,0,0,.18);
+  }
+  .top-inner{
+    max-width:1020px; margin:0 auto; padding:10px 14px;
+    display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  }
+  .top h1{font-size:1.02rem; margin:0; font-weight:800; letter-spacing:0}
+  .top .sub{margin:0; font-size:.72rem; opacity:.9}
+  .progress-box{min-width:210px; flex:0 1 260px}
+  .bar-outer{height:9px; background:rgba(255,255,255,.28); border-radius:99px; overflow:hidden}
+  .bar-inner{height:100%; width:0%; background:#fde68a; border-radius:99px; transition:width .35s ease}
+  .prog-meta{font-size:.72rem; margin-top:4px; opacity:.95; display:flex; justify-content:space-between; gap:8px}
+
+  /* ---------- Layout ---------- */
+  main{max-width:1020px; margin:0 auto; padding:14px 12px 60px}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:16px 16px 18px; margin:14px 0;
+    box-shadow:0 1px 3px rgba(15,23,42,.06), 0 8px 24px -18px rgba(15,23,42,.35);
+  }
+  .card h2{font-size:1.02rem; margin:0 0 8px; font-weight:800}
+  .card h3{font-size:.95rem; margin:0 0 6px; font-weight:800; color:var(--brand)}
+  .prose p{margin:6px 0; font-size:.93rem}
+  .prose ul{margin:6px 0; padding-inline-start:20px; font-size:.93rem}
+  .prose li{margin:4px 0}
+  .prose b{color:#0b4f4a}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0}
+  .chip{
+    background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0;
+    padding:5px 12px; border-radius:99px; font-size:.82rem; font-weight:700;
+  }
+
+  /* ---------- Steps ---------- */
+  .step-head{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+  .step-head .num{
+    flex:0 0 32px; height:32px; border-radius:10px;
+    background:linear-gradient(135deg,#0f766e,#14b8a6); color:#fff;
+    display:grid; place-items:center; font-weight:800; font-size:.95rem;
+  }
+  .step-head h2{margin:0; flex:1; font-size:1rem}
+  .tick{
+    flex:0 0 26px; height:26px; border-radius:50%;
+    background:#dcfce7; color:#16a34a; display:grid; place-items:center;
+    font-weight:900; font-size:.9rem; opacity:0; transform:scale(.6);
+    transition:.25s ease;
+  }
+  .tick.show{opacity:1; transform:scale(1)}
+  .step.solved{border-color:#86efac; box-shadow:0 0 0 3px #f0fdf4 inset}
+
+  /* ---------- ECG strip ---------- */
+  .strip-wrap{
+    overflow-x:auto; overflow-y:hidden; background:#fff;
+    border:1px solid #f1c9c9; border-radius:12px; padding:4px; margin:10px 0 4px;
+    -webkit-overflow-scrolling:touch;
+  }
+  svg.strip{display:block; width:100%; min-width:660px; height:auto; font-family:inherit}
+  .hint{font-size:.74rem; color:var(--muted); margin:4px 0 10px}
+  .legend{font-size:.74rem; color:var(--muted); margin:0 0 6px}
+  .legend span{display:inline-block; margin-inline-end:10px}
+
+  /* ---------- Quiz ---------- */
+  .qtext{font-size:.92rem; margin:10px 0 4px}
+  .options{margin-top:6px}
+  .opt{
+    display:flex; gap:10px; align-items:flex-start; width:100%;
+    text-align:right; background:#f8fafc; border:1.5px solid #cbd5e1;
+    border-radius:11px; padding:10px 12px; margin:8px 0;
+    font:inherit; font-size:.9rem; color:inherit; cursor:pointer;
+    transition:background .15s, border-color .15s, transform .1s;
+  }
+  .opt:hover:not(:disabled){background:#e0f2fe; border-color:#0284c7}
+  .opt:active:not(:disabled){transform:scale(.995)}
+  .opt .letter{
+    flex:0 0 26px; height:26px; border-radius:50%;
+    background:var(--brand); color:#fff; display:grid; place-items:center;
+    font-size:.78rem; font-weight:800; margin-top:1px;
+  }
+  .opt .txt{flex:1}
+  .opt:disabled{cursor:default; opacity:.96}
+  .opt.correct{background:#dcfce7; border-color:#16a34a}
+  .opt.correct .letter{background:#16a34a}
+  .opt.wrong{background:#fee2e2; border-color:#dc2626}
+  .opt.wrong .letter{background:#dc2626}
+  .feedback{display:none; margin-top:10px; padding:12px; border-radius:11px; font-size:.89rem}
+  .feedback.show{display:block}
+  .feedback.ok{background:#f0fdf4; border:1px solid #86efac}
+  .feedback.bad{background:#fef2f2; border:1px solid #fca5a5}
+  .fb-head{font-weight:800; margin-bottom:4px}
+  .feedback.ok .fb-head{color:#15803d}
+  .feedback.bad .fb-head{color:#b91c1c}
+
+  /* ---------- Final ---------- */
+  .final-head{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+  .final-head .num{
+    flex:0 0 32px; height:32px; border-radius:10px;
+    background:linear-gradient(135deg,#b45309,#f59e0b); color:#fff;
+    display:grid; place-items:center; font-weight:800;
+  }
+  .mini{border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; background:#fff}
+  .mini.solved{border-color:#86efac}
+
+  /* ---------- Buttons ---------- */
+  .tools{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+  .btn{
+    font:inherit; font-size:.85rem; font-weight:700; cursor:pointer;
+    border-radius:10px; padding:9px 16px; border:1.5px solid #0f766e;
+    background:#0f766e; color:#fff; transition:.15s;
+  }
+  .btn:hover{background:#0b5f59; border-color:#0b5f59}
+  .btn.ghost{background:#fff; color:#0f766e}
+  .btn.ghost:hover{background:#ecfdf5}
+
+  /* ---------- Footer ---------- */
+  footer{text-align:center; padding:20px 12px 42px}
+  .footnote{
+    font-size:.9rem; color:#0f172a; margin:0 0 6px; line-height:1.8;
+  }
+  .footnote b{font-weight:900; color:#0f766e}
+  .footnote-small{font-size:.74rem; color:var(--muted); margin:0}
+
+  /* =========================================================
+     کارت QR — سمت چپ صفحه، خارج از حاشیه محتوا
+     ========================================================= */
+  .side-qr{
+    max-width: 320px;
+    margin: 20px auto;
+    padding: 14px 14px 12px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 16px -8px rgba(15,23,42,.2), 0 1px 3px rgba(15,23,42,.06);
+  }
+  .side-title{
+    margin: 0;
+    font-size: .95rem;
+    font-weight: 900;
+    color: #0f766e;
+    text-align: center;
+    letter-spacing: 0;
+  }
+  .side-img,
+  .side-code{
+    width: 100%;
+    max-width: 200px;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .side-img{
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 2px;
+    object-fit: contain;
+  }
+  .side-code{
+    border: 1px solid #e2e8f0;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+  }
+  .side-code svg{ display:block; width:100%; height:100%; }
+  .side-label{
+    font-size: .85rem;
+    font-weight: 900;
+    color: #0f766e;
+    text-align: center;
+    margin: 2px 0 0;
+    letter-spacing: 0;
+  }
+  .qr-text-fallback{
+    width: 100%;
+    max-width: 200px;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: .82rem;
+    text-align: center;
+    color: #475569;
+    background: #f8fafc;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  .qr-text-fallback .fb-phone{
+    font-weight: 800;
+    color: #0f766e;
+    font-size: .95rem;
+    direction: ltr;
+    display: inline-block;
+  }
+
+  @media (min-width: 1200px){
+    .side-qr{
+      position: fixed;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      margin: 0;
+      max-width: none;
+      width: 80px;
+      padding: 7px 6px 8px;
+      gap: 5px;
+      z-index: 45;
+      border-radius: 12px;
+      box-shadow: 0 10px 28px -12px rgba(15,23,42,.4), 0 1px 3px rgba(15,23,42,.06);
+    }
+    .side-title{ display: none; }
+    .side-img,
+    .side-code{
+      max-width: none;
+      border-radius: 6px;
+    }
+    .side-img{ padding: 1px; }
+    .side-code{ padding: 2px; }
+    .qr-text-fallback{
+      max-width: none;
+      padding: 4px;
+      font-size: .55rem;
+      border-radius: 6px;
+      gap: 3px;
+    }
+    .qr-text-fallback .fb-phone{ font-size: .6rem; }
+    .side-label{ font-size: .58rem; margin: 0; }
+  }
+  @media (min-width: 1260px){
+    .side-qr{
+      width: 110px;
+      padding: 9px 8px 10px;
+      gap: 6px;
+      border-radius: 14px;
+    }
+    .side-img, .side-code{ border-radius: 8px; }
+    .side-label{ font-size: .68rem; }
+  }
+  @media (min-width: 1340px){
+    .side-qr{
+      width: 150px;
+      padding: 12px 12px 12px;
+      gap: 8px;
+      left: 18px;
+      border-radius: 16px;
+    }
+    .side-img, .side-code{ border-radius: 10px; }
+    .side-label{ font-size: .8rem; margin-top: 2px; }
+  }
+
+  @media (max-width:520px){
+    .top h1{font-size:.9rem}
+    .card{padding:13px; border-radius:13px}
+    .opt{font-size:.85rem}
+    svg.strip{min-width:600px}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero-banner" role="banner">
+  <span class="hero-text">رشته فوریت‌های پزشکی: درس فوریت‌های داخلی ۱</span>
+</div>
+
+<header class="top">
+  <div class="top-inner">
+    <div>
+      <h1>تفسیر نظام‌مند ریتم‌های سینوسی</h1>
+      <p class="sub">درس فوریت‌های داخلی ۱ — دانشجویان فوریت‌های پزشکی</p>
+    </div>
+    <div class="progress-box">
+      <div class="bar-outer"><div class="bar-inner" id="bar"></div></div>
+      <div class="prog-meta">
+        <span id="pct">۰٪</span>
+        <span id="score">درست: ۰ از ۰</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= INTRO ================= -->
+  <section class="card intro">
+    <h2>چطور از این درس استفاده کنیم؟</h2>
+    <p class="prose">
+      این درس در <b>شش گام کوتاه</b> طراحی شده است. در هر گام، یک معیار از چک‌لیست پنج‌گانه تفسیر ریتم سینوسی
+      روی یک نوار قلب نمونه تمرین می‌شود:
+    </p>
+    <div class="chips">
+      <span class="chip">۱. ریت</span>
+      <span class="chip">۲. نظم</span>
+      <span class="chip">۳. موج P</span>
+      <span class="chip">۴. فاصله PR</span>
+      <span class="chip">۵. عرض QRS</span>
+      <span class="chip">۶. ترکیب و تشخیص</span>
+    </div>
+    <p class="prose">
+      در پایان هر گام یک <b>پرسش خودآزمایی</b> آمده است. پس از پاسخ، درست یا نادرست بودن آن و دلیلش به زبان ساده
+      توضیح داده می‌شود و <b>بخش مربوط به همان معیار روی نوار قلب پررنگ</b> می‌شود.
+    </p>
+    <p class="prose">
+      در بخش پایانی، <b>پنج نوار قلب</b> را از ابتدا تا انتها خودتان تفسیر می‌کنید.
+      پیشرفت شما به‌طور خودکار در همین مرورگر ذخیره می‌شود.
+    </p>
+  </section>
+
+  <div id="steps"></div>
+
+  <section class="card" id="final-card">
+    <div class="final-head">
+      <span class="num">★</span>
+      <h2>تمرین پایانی: پنج نوار را خودتان تفسیر کنید</h2>
+    </div>
+    <p class="prose">
+      در هر نوار، چک‌لیست را در ذهن (یا روی کاغذ) اجرا کنید: <b>ریت → نظم → موج P → فاصله PR → عرض QRS</b>.
+      سپس یافته اصلی را انتخاب کنید.
+    </p>
+    <div id="final-list"></div>
+  </section>
+
+  <div class="tools">
+    <button class="btn ghost" id="resetBtn" type="button">پاک کردن پیشرفت و شروع دوباره</button>
+  </div>
+
+</main>
+
+<aside class="side-qr" aria-label="اطلاعات تماس مدرس و کد QR">
+  <h3 class="side-title">تماس با مدرس</h3>
+
+  <img class="side-img"
+       id="sideImg"
+       src="https://raw.githubusercontent.com/mehajinezhad/ECG_Axis_Interpretation/main/img-FOs7otp21NneKmcQd3s2w.png"
+       alt="تصویر مدرس">
+
+  <div class="side-code" id="qrCode" role="img" aria-label="کد QR اطلاعات تماس مدرس"></div>
+
+  <div class="qr-text-fallback" id="qrFallback" style="display:none;" aria-hidden="true">
+    <span class="fb-phone">۰۹۱۷۳۷۸۹۸۱۱</span>
+    <span class="fb-phone">esmaielhajinezhad@gmail.com</span>
+  </div>
+
+  <span class="side-label">مرا اسکن کن</span>
+</aside>
+
+<footer>
+  <p class="footnote">
+    <b>مدرس:</b> دکتر محمد اسماعیل حاجی نژاد، دانشگاه علوم پزشکی بوشهر، گروه هوشبری
+  </p>
+  <p class="footnote-small">
+    درس تعاملی — تفسیر نظام‌مند ریتم‌های سینوسی
+  </p>
+</footer>
+
+<script>
+/* ============================================================
+   ۱) تولید کد QR به‌صورت کامل درون‌مرورگری (بدون وابستگی خارجی)
+   پیاده‌سازی بر اساس الگوریتم استاندارد ISO/IEC 18004
+   ============================================================ */
+var QRGen = (function () {
+  'use strict';
+
+  // میدان گالوا GF(2^8) با چندجمله‌ای اولیه 0x11D
+  var EXP = new Uint8Array(512);
+  var LOG = new Uint8Array(256);
+  (function () {
+    var x = 1;
+    for (var i = 0; i < 255; i++) {
+      EXP[i] = x;
+      LOG[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11D;
+    }
+    for (var i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  })();
+
+  function glog(n) {
+    if (n < 1) throw new Error('glog(' + n + ')');
+    return LOG[n];
+  }
+  function gexp(n) {
+    while (n < 0) n += 255;
+    while (n >= 255) n -= 255;
+    return EXP[n];
+  }
+  function gmul(a, b) {
+    if (a === 0 || b === 0) return 0;
+    return EXP[LOG[a] + LOG[b]];
+  }
+
+  function polyMul(a, b) {
+    var result = new Array(a.length + b.length - 1);
+    for (var i = 0; i < result.length; i++) result[i] = 0;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] === 0) continue;
+      for (var j = 0; j < b.length; j++) {
+        if (b[j] === 0) continue;
+        result[i + j] ^= gmul(a[i], b[j]);
+      }
+    }
+    return result;
+  }
+
+  // جدول بلوک‌های RS برای نسخه‌های ۱ تا ۱۰ (سطوح L و M)
+  // قالب: [count1, total1, data1, count2, total2, data2, ...]
+  var RS_TABLE = {
+    1:  { L: [1, 26, 19],  M: [1, 26, 16] },
+    2:  { L: [1, 44, 34],  M: [1, 44, 28] },
+    3:  { L: [1, 70, 55],  M: [1, 70, 44] },
+    4:  { L: [1, 100, 80], M: [2, 50, 32] },
+    5:  { L: [1, 134, 108], M: [2, 67, 43] },
+    6:  { L: [2, 86, 68],  M: [4, 43, 27] },
+    7:  { L: [2, 98, 78],  M: [4, 49, 31] },
+    8:  { L: [2, 121, 97], M: [2, 60, 38, 2, 61, 39] },
+    9:  { L: [2, 146, 116], M: [3, 58, 36, 2, 59, 37] },
+    10: { L: [2, 86, 68, 2, 87, 69], M: [4, 69, 43, 1, 70, 44] }
+  };
+
+  var ALIGN = {
+    1: [], 2: [6, 18], 3: [6, 22], 4: [6, 26], 5: [6, 30],
+    6: [6, 34], 7: [6, 22, 38], 8: [6, 24, 42], 9: [6, 26, 46], 10: [6, 28, 50]
+  };
+
+  var EC_BITS = { L: 1, M: 0, Q: 3, H: 2 };
+
+  function getBlocks(version, level) {
+    var t = RS_TABLE[version][level];
+    var blocks = [];
+    for (var i = 0; i < t.length; i += 3) {
+      for (var k = 0; k < t[i]; k++) {
+        blocks.push({ total: t[i + 1], data: t[i + 2] });
+      }
+    }
+    return blocks;
+  }
+
+  function computeEC(data, ecCount) {
+    var gen = [1];
+    for (var i = 0; i < ecCount; i++) gen = polyMul(gen, [1, gexp(i)]);
+    var buf = data.slice();
+    for (var i = 0; i < ecCount; i++) buf.push(0);
+    for (var i = 0; i < data.length; i++) {
+      var coef = buf[i];
+      if (coef === 0) continue;
+      for (var j = 0; j < gen.length; j++) buf[i + j] ^= gmul(gen[j], coef);
+    }
+    return buf.slice(data.length);
+  }
+
+  // BCH برای اطلاعات فرمت
+  var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | 1;
+  function bchDigit(d) { var n = 0; while (d !== 0) { n++; d >>>= 1; } return n; }
+  function bchFormat(data) {
+    var d = data << 10;
+    while (bchDigit(d) - bchDigit(G15) >= 0) d ^= (G15 << (bchDigit(d) - bchDigit(G15)));
+    return ((data << 10) | d) ^ 0x5412;
+  }
+  // BCH برای اطلاعات نسخه
+  var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | 1;
+  function bchVersion(data) {
+    var d = data << 12;
+    while (bchDigit(d) - bchDigit(G18) >= 0) d ^= (G18 << (bchDigit(d) - bchDigit(G18)));
+    return (data << 12) | d;
+  }
+
+  function utf8Bytes(str) {
+    var out = [];
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c < 0x80) out.push(c);
+      else if (c < 0x800) out.push(0xC0 | (c >> 6), 0x80 | (c & 0x3F));
+      else if (c >= 0xD800 && c <= 0xDBFF) {
+        var c2 = str.charCodeAt(++i);
+        var cp = 0x10000 + ((c - 0xD800) << 10) + (c2 - 0xDC00);
+        out.push(0xF0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3F),
+                 0x80 | ((cp >> 6) & 0x3F), 0x80 | (cp & 0x3F));
+      } else {
+        out.push(0xE0 | (c >> 12), 0x80 | ((c >> 6) & 0x3F), 0x80 | (c & 0x3F));
+      }
+    }
+    return out;
+  }
+
+  function chooseVersion(byteLen) {
+    // ترجیح سطح M؛ در صورت نیاز L
+    for (var v = 1; v <= 10; v++) {
+      var blocks = getBlocks(v, 'M');
+      var cap = 0;
+      for (var i = 0; i < blocks.length; i++) cap += blocks[i].data;
+      var cntBits = v < 10 ? 8 : 16;
+      if (4 + cntBits + byteLen * 8 <= cap * 8) return { version: v, level: 'M' };
+    }
+    for (var v = 1; v <= 10; v++) {
+      var blocks = getBlocks(v, 'L');
+      var cap = 0;
+      for (var i = 0; i < blocks.length; i++) cap += blocks[i].data;
+      var cntBits = v < 10 ? 8 : 16;
+      if (4 + cntBits + byteLen * 8 <= cap * 8) return { version: v, level: 'L' };
+    }
+    throw new Error('حجم داده بیش از ظرفیت نسخه‌های پشتیبانی‌شده است');
+  }
+
+  function buildFinalBytes(bytes, version, level) {
+    var blocks = getBlocks(version, level);
+    var totalDataCW = 0;
+    for (var i = 0; i < blocks.length; i++) totalDataCW += blocks[i].data;
+
+    var bits = [];
+    function put(value, length) {
+      for (var i = length - 1; i >= 0; i--) bits.push((value >> i) & 1);
+    }
+    put(4, 4); // byte mode
+    var cntBits = version < 10 ? 8 : 16;
+    put(bytes.length, cntBits);
+    for (var i = 0; i < bytes.length; i++) put(bytes[i], 8);
+
+    var capBits = totalDataCW * 8;
+    var termLen = Math.min(4, capBits - bits.length);
+    for (var i = 0; i < termLen; i++) bits.push(0);
+    while (bits.length % 8 !== 0) bits.push(0);
+
+    var pads = [0xEC, 0x11], pi = 0;
+    while (bits.length < capBits) { put(pads[pi], 8); pi ^= 1; }
+
+    var dataBytes = [];
+    for (var i = 0; i < bits.length; i += 8) {
+      var b = 0;
+      for (var j = 0; j < 8; j++) b = (b << 1) | bits[i + j];
+      dataBytes.push(b);
+    }
+
+    var dataBlocks = [], ecBlocks = [], dIdx = 0;
+    for (var i = 0; i < blocks.length; i++) {
+      var blk = blocks[i];
+      var dataBlk = dataBytes.slice(dIdx, dIdx + blk.data);
+      dIdx += blk.data;
+      dataBlocks.push(dataBlk);
+      ecBlocks.push(computeEC(dataBlk, blk.total - blk.data));
+    }
+
+    var maxD = 0, maxE = 0;
+    for (var i = 0; i < dataBlocks.length; i++) {
+      if (dataBlocks[i].length > maxD) maxD = dataBlocks[i].length;
+      if (ecBlocks[i].length > maxE) maxE = ecBlocks[i].length;
+    }
+    var out = [];
+    for (var i = 0; i < maxD; i++)
+      for (var j = 0; j < dataBlocks.length; j++)
+        if (i < dataBlocks[j].length) out.push(dataBlocks[j][i]);
+    for (var i = 0; i < maxE; i++)
+      for (var j = 0; j < ecBlocks.length; j++)
+        if (i < ecBlocks[j].length) out.push(ecBlocks[j][i]);
+    return out;
+  }
+
+  function createMatrix(size) {
+    var m = [];
+    for (var y = 0; y < size; y++) {
+      m[y] = [];
+      for (var x = 0; x < size; x++) m[y][x] = null;
+    }
+    return m;
+  }
+
+  function drawFinder(m, size, row, col) {
+    for (var dy = -1; dy <= 7; dy++) {
+      for (var dx = -1; dx <= 7; dx++) {
+        var r = row + dy, c = col + dx;
+        if (r < 0 || r >= size || c < 0 || c >= size) continue;
+        var dark;
+        if (dy === -1 || dy === 7 || dx === -1 || dx === 7) dark = false;
+        else if (dy === 0 || dy === 6 || dx === 0 || dx === 6) dark = true;
+        else if (dy >= 2 && dy <= 4 && dx >= 2 && dx <= 4) dark = true;
+        else dark = false;
+        m[r][c] = dark;
+      }
+    }
+  }
+
+  function drawAlign(m, row, col) {
+    for (var dy = -2; dy <= 2; dy++)
+      for (var dx = -2; dx <= 2; dx++)
+        m[row + dy][col + dx] = Math.max(Math.abs(dy), Math.abs(dx)) !== 1;
+  }
+
+  function setupFunctionPatterns(m, size, version) {
+    drawFinder(m, size, 0, 0);
+    drawFinder(m, size, 0, size - 7);
+    drawFinder(m, size, size - 7, 0);
+
+    for (var i = 8; i < size - 8; i++) {
+      m[6][i] = (i % 2 === 0);
+      m[i][6] = (i % 2 === 0);
+    }
+
+    var pos = ALIGN[version] || [];
+    var last = pos.length - 1;
+    for (var i = 0; i <= last; i++) {
+      for (var j = 0; j <= last; j++) {
+        if ((i === 0 && j === 0) || (i === 0 && j === last) || (i === last && j === 0)) continue;
+        drawAlign(m, pos[i], pos[j]);
+      }
+    }
+
+    m[size - 8][8] = true;
+
+    for (var i = 0; i < 9; i++) {
+      if (m[8][i] === null) m[8][i] = false;
+      if (m[i][8] === null) m[i][8] = false;
+    }
+    for (var i = 0; i < 8; i++) {
+      if (m[8][size - 1 - i] === null) m[8][size - 1 - i] = false;
+      if (m[size - 1 - i][8] === null) m[size - 1 - i][8] = false;
+    }
+
+    if (version >= 7) {
+      var vbits = bchVersion(version);
+      for (var i = 0; i < 18; i++) {
+        var bit = ((vbits >> i) & 1) === 1;
+        var r = Math.floor(i / 3);
+        var c = (i % 3) + size - 11;
+        m[r][c] = bit;
+        m[c][r] = bit;
+      }
+    }
+  }
+
+  function maskFn(mask, i, j) {
+    switch (mask) {
+      case 0: return (i + j) % 2 === 0;
+      case 1: return i % 2 === 0;
+      case 2: return j % 3 === 0;
+      case 3: return (i + j) % 3 === 0;
+      case 4: return (Math.floor(i / 2) + Math.floor(j / 3)) % 2 === 0;
+      case 5: return ((i * j) % 2) + ((i * j) % 3) === 0;
+      case 6: return (((i * j) % 2) + ((i * j) % 3)) % 2 === 0;
+      case 7: return (((i + j) % 2) + ((i * j) % 3)) % 2 === 0;
+    }
+    return false;
+  }
+
+  function placeData(m, size, finalBytes, mask) {
+    var dataBits = [];
+    for (var i = 0; i < finalBytes.length; i++)
+      for (var b = 7; b >= 0; b--) dataBits.push((finalBytes[i] >> b) & 1);
+
+    var bitIdx = 0;
+    var col = size - 1;
+    var inc = -1;
+    var row = size - 1;
+    while (col > 0) {
+      if (col === 6) col--;
+      for (;;) {
+        for (var k = 0; k < 2; k++) {
+          if (m[row][col - k] === null) {
+            var dark = (bitIdx < dataBits.length) && dataBits[bitIdx] === 1;
+            if (maskFn(mask, row, col - k)) dark = !dark;
+            m[row][col - k] = dark;
+            bitIdx++;
+          }
+        }
+        row += inc;
+        if (row < 0 || row >= size) {
+          row -= inc;
+          inc = -inc;
+          break;
+        }
+      }
+      col -= 2;
+    }
+    // ایمنی: هیچ خانه‌ای null نماند
+    for (var y = 0; y < size; y++)
+      for (var x = 0; x < size; x++)
+        if (m[y][x] === null) m[y][x] = false;
+  }
+
+  function placeFormat(m, size, level, mask) {
+    var data = (EC_BITS[level] << 3) | mask;
+    var bits = bchFormat(data);
+    for (var i = 0; i < 15; i++) {
+      var bit = ((bits >> i) & 1) === 1;
+      if (i < 6) m[i][8] = bit;
+      else if (i < 8) m[i + 1][8] = bit;
+      else m[size - 15 + i][8] = bit;
+    }
+    for (var i = 0; i < 15; i++) {
+      var bit = ((bits >> i) & 1) === 1;
+      if (i < 8) m[8][size - i - 1] = bit;
+      else if (i < 9) m[8][15 - i - 1 + 1] = bit;
+      else m[8][15 - i - 1] = bit;
+    }
+    m[size - 8][8] = true;
+  }
+
+  function penalty(m, size) {
+    var p = 0;
+    for (var y = 0; y < size; y++) {
+      var run = 1;
+      for (var x = 1; x < size; x++) {
+        if (m[y][x] === m[y][x - 1]) run++;
+        else { if (run >= 5) p += run - 2; run = 1; }
+      }
+      if (run >= 5) p += run - 2;
+    }
+    for (var x = 0; x < size; x++) {
+      var run = 1;
+      for (var y = 1; y < size; y++) {
+        if (m[y][x] === m[y - 1][x]) run++;
+        else { if (run >= 5) p += run - 2; run = 1; }
+      }
+      if (run >= 5) p += run - 2;
+    }
+    for (var y = 0; y < size - 1; y++)
+      for (var x = 0; x < size - 1; x++) {
+        var c = m[y][x];
+        if (m[y][x + 1] === c && m[y + 1][x] === c && m[y + 1][x + 1] === c) p += 3;
+      }
+    var patA = [true, false, true, true, true, false, true, false, false, false, false];
+    var patB = [false, false, false, false, true, false, true, true, true, false, true];
+    for (var y = 0; y < size; y++)
+      for (var x = 0; x <= size - 11; x++) {
+        var okA = true, okB = true;
+        for (var k = 0; k < 11; k++) {
+          if (m[y][x + k] !== patA[k]) okA = false;
+          if (m[y][x + k] !== patB[k]) okB = false;
+        }
+        if (okA) p += 40;
+        if (okB) p += 40;
+      }
+    for (var x = 0; x < size; x++)
+      for (var y = 0; y <= size - 11; y++) {
+        var okA = true, okB = true;
+        for (var k = 0; k < 11; k++) {
+          if (m[y + k][x] !== patA[k]) okA = false;
+          if (m[y + k][x] !== patB[k]) okB = false;
+        }
+        if (okA) p += 40;
+        if (okB) p += 40;
+      }
+    var dark = 0;
+    for (var y = 0; y < size; y++)
+      for (var x = 0; x < size; x++)
+        if (m[y][x]) dark++;
+    var pct = (dark * 100) / (size * size);
+    p += Math.floor(Math.abs(pct - 50) / 5) * 10;
+    return p;
+  }
+
+  function generate(text) {
+    var bytes = utf8Bytes(text);
+    var sel = chooseVersion(bytes.length);
+    var version = sel.version;
+    var level = sel.level;
+    var finalBytes = buildFinalBytes(bytes, version, level);
+    var size = version * 4 + 17;
+
+    var best = null, bestScore = Infinity;
+    for (var mask = 0; mask < 8; mask++) {
+      var m = createMatrix(size);
+      setupFunctionPatterns(m, size, version);
+      placeData(m, size, finalBytes, mask);
+      placeFormat(m, size, level, mask);
+      var score = penalty(m, size);
+      if (score < bestScore) { bestScore = score; best = m; }
+    }
+    return { size: size, modules: best };
+  }
+
+  function toSVG(qr) {
+    var size = qr.size;
+    var m = qr.modules;
+    var quiet = 4;
+    var total = size + quiet * 2;
+    var path = '';
+    for (var y = 0; y < size; y++) {
+      for (var x = 0; x < size; x++) {
+        if (m[y][x]) path += 'M' + (x + quiet) + ' ' + (y + quiet) + 'h1v1h-1z';
+      }
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + total + ' ' + total + '" ' +
+           'shape-rendering="crispEdges" style="width:100%;height:100%;display:block">' +
+           '<rect width="' + total + '" height="' + total + '" fill="#ffffff"/>' +
+           '<path d="' + path + '" fill="#000000"/>' +
+           '</svg>';
+  }
+
+  return { generate: generate, toSVG: toSVG };
+})();
+
+/* ============================================================
+   ۲) ساخت کد QR با محتوای تماس مدرس
+   ============================================================ */
+(function () {
+  var qrEl = document.getElementById('qrCode');
+  var fbEl = document.getElementById('qrFallback');
+  if (!qrEl) return;
+
+  var qrText = [
+    'محمد اسماعیل حاجی‌نژاد',
+    'دکتری آموزش پزشکی',
+    'تماس: 09173789811',
+    'آدرس ایمیل:',
+    'esmaielhajinezhad@gmail.com'
+  ].join('\n');
+
+  try {
+    var qr = QRGen.generate(qrText);
+    qrEl.innerHTML = QRGen.toSVG(qr);
+  } catch (err) {
+    qrEl.style.display = 'none';
+    if (fbEl) {
+      fbEl.style.display = 'flex';
+      fbEl.setAttribute('aria-hidden', 'false');
+    }
+  }
+})();
+
+/* ============================================================
+   ۳) بارگذاری تصویر مدرس با fallback
+   ============================================================ */
+(function () {
+  var img = document.getElementById('sideImg');
+  if (!img) return;
+  var stage = 0;
+  img.addEventListener('error', function () {
+    stage++;
+    if (stage === 1) {
+      img.src = 'https://github.com/mehajinezhad/ECG_Axis_Interpretation/raw/main/img-FOs7otp21NneKmcQd3s2w.png';
+      return;
+    }
+    img.style.display = 'none';
+  });
+})();
+
+/* ============================================================
+   ۴) درس تعاملی — نوار قلب و آزمون
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var NS = 'http://www.w3.org/2000/svg';
+  var MMX = 6;
+  var BASE_Y = 120;
+  var H = 180;
+  var W = 900;
+  var FA = '۰۱۲۳۴۵۶۷۸۹';
+
+  function fa(n) { return String(n).replace(/\d/g, function (d) { return FA[+d]; }); }
+  function gauss(x, mu, s) { var d = x - mu; return Math.exp(-(d * d) / (2 * s * s)); }
+
+  var CFG = {
+    nsr:        { rate: 70,  pr: 0.16, qrs: 0.08, p: true },
+    brady:      { rate: 50,  pr: 0.18, qrs: 0.10, p: true },
+    tachy:      { rate: 130, pr: 0.14, qrs: 0.08, p: true },
+    arrhythmia: { intervals: [1.00, 0.75], pr: 0.16, qrs: 0.08, p: true },
+    wide:       { rate: 120, pr: 0.16, qrs: 0.14, p: true, rAmp: 7.5, sAmp: 2.6 }
+  };
+
+  function buildBeats(cfg) {
+    var beats = [];
+    var t = 2, i = 0, guard = 0;
+    while (t < 150 && guard < 200) {
+      beats.push(t);
+      var rr = cfg.intervals
+        ? cfg.intervals[i % cfg.intervals.length] * 25
+        : (60 / cfg.rate) * 25;
+      t += rr; i++; guard++;
+    }
+    return beats;
+  }
+
+  function renderStrip(svg, cfg, uid) {
+    svg.innerHTML = '';
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+    var defs = document.createElementNS(NS, 'defs');
+    defs.innerHTML =
+      '<pattern id="sm' + uid + '" width="6" height="6" patternUnits="userSpaceOnUse">' +
+        '<path d="M 6 0 L 0 0 0 6" fill="none" stroke="#f7d4d4" stroke-width="0.6"/>' +
+      '</pattern>' +
+      '<pattern id="bg' + uid + '" width="30" height="30" patternUnits="userSpaceOnUse">' +
+        '<rect width="30" height="30" fill="url(#sm' + uid + ')"/>' +
+        '<path d="M 30 0 L 0 0 0 30" fill="none" stroke="#ecb0b0" stroke-width="1.1"/>' +
+      '</pattern>';
+    svg.appendChild(defs);
+
+    var bg = document.createElementNS(NS, 'rect');
+    bg.setAttribute('x', 0); bg.setAttribute('y', 0);
+    bg.setAttribute('width', W); bg.setAttribute('height', H);
+    bg.setAttribute('fill', 'url(#bg' + uid + ')');
+    svg.appendChild(bg);
+
+    var beats = buildBeats(cfg);
+    var pr = cfg.pr * 25;
+    var wq = cfg.qrs * 25;
+    var pDur = 2.2;
+    var rAmp = cfg.rAmp || 9;
+    var sAmp = cfg.sAmp || 1.8;
+
+    var d = '';
+    for (var x = 0; x <= 150.0001; x += 0.25) {
+      var y = 0;
+      for (var k = 0; k < beats.length; k++) {
+        var tQ = beats[k];
+        if (cfg.p !== false) {
+          var tP = tQ - pr + pDur * 0.5;
+          y += 1.3 * gauss(x, tP, 0.85);
+        }
+        y += -0.7 * gauss(x, tQ + 0.18 * wq, 0.12 * wq + 0.08);
+        y += rAmp * gauss(x, tQ + 0.45 * wq, 0.20 * wq + 0.10);
+        y += -sAmp * gauss(x, tQ + 0.80 * wq, 0.16 * wq + 0.08);
+        y += 2.2 * gauss(x, tQ + wq + 2.8, 1.5);
+      }
+      d += (d ? 'L' : 'M') + (x * MMX).toFixed(1) + ' ' + (BASE_Y - y * MMX).toFixed(1) + ' ';
+    }
+
+    var trace = document.createElementNS(NS, 'path');
+    trace.setAttribute('d', d);
+    trace.setAttribute('fill', 'none');
+    trace.setAttribute('stroke', '#0f172a');
+    trace.setAttribute('stroke-width', '2');
+    trace.setAttribute('stroke-linejoin', 'round');
+    trace.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(trace);
+
+    svg._meta = { beats: beats, pr: pr, wq: wq, cfg: cfg };
+  }
+
+  function addRect(svg, x1, x2, y1, y2, fill, stroke) {
+    var r = document.createElementNS(NS, 'rect');
+    r.setAttribute('x', (x1 * MMX).toFixed(1));
+    r.setAttribute('y', (BASE_Y - y2 * MMX).toFixed(1));
+    r.setAttribute('width', ((x2 - x1) * MMX).toFixed(1));
+    r.setAttribute('height', ((y2 - y1) * MMX).toFixed(1));
+    r.setAttribute('fill', fill);
+    r.setAttribute('stroke', stroke || 'none');
+    r.setAttribute('stroke-width', '1.5');
+    r.setAttribute('rx', '4');
+    return r;
+  }
+
+  function addLabel(svg, xmm, ymm, text, color) {
+    var t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', (xmm * MMX).toFixed(1));
+    t.setAttribute('y', (BASE_Y - ymm * MMX).toFixed(1));
+    t.setAttribute('font-size', '15');
+    t.setAttribute('font-weight', '700');
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('direction', 'rtl');
+    t.setAttribute('fill', color || '#0f766e');
+    t.setAttribute('style',
+      'paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round;font-family:inherit');
+    t.textContent = text;
+    return t;
+  }
+
+  function addEllipse(svg, xmm, ymm, rx, ry, fill, stroke) {
+    var e = document.createElementNS(NS, 'ellipse');
+    e.setAttribute('cx', (xmm * MMX).toFixed(1));
+    e.setAttribute('cy', (BASE_Y - ymm * MMX).toFixed(1));
+    e.setAttribute('rx', rx);
+    e.setAttribute('ry', ry);
+    e.setAttribute('fill', fill);
+    e.setAttribute('stroke', stroke);
+    e.setAttribute('stroke-width', '1.6');
+    return e;
+  }
+
+  function addBracket(svg, x1mm, x2mm, ymm, color, labelText) {
+    var y = BASE_Y - ymm * MMX;
+    var x1 = x1mm * MMX;
+    var x2 = x2mm * MMX;
+    var p = document.createElementNS(NS, 'path');
+    p.setAttribute('d',
+      'M' + x1 + ' ' + y + ' L' + x2 + ' ' + y +
+      ' M' + x1 + ' ' + (y - 7) + ' L' + x1 + ' ' + (y + 7) +
+      ' M' + x2 + ' ' + (y - 7) + ' L' + x2 + ' ' + (y + 7));
+    p.setAttribute('stroke', color);
+    p.setAttribute('stroke-width', '2.2');
+    p.setAttribute('fill', 'none');
+    p.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(p);
+    if (labelText) svg.appendChild(addLabel(svg, (x1mm + x2mm) / 2, ymm + 8, labelText, color));
+  }
+
+  var SECTIONS = [
+    {
+      id: 1, title: 'گام ۱ — ریت (Rate)', strip: 'nsr',
+      intro:
+        '<p>هر تفسیر ریتم با <b>ریت</b> شروع می‌شود. دو روش سریع وجود دارد:</p>' +
+        '<ul>' +
+        '<li><b>روش ۶ ثانیه‌ای:</b> تعداد کمپلکس‌های QRS در یک نوار ۶ ثانیه‌ای را بشمارید و در ۱۰ ضرب کنید.</li>' +
+        '<li><b>روش مربع‌های بزرگ:</b> ۳۰۰ ÷ تعداد مربع‌های بزرگ بین دو موج R متوالی.</li>' +
+        '</ul>' +
+        '<p>ریت نرمال بزرگسال: <b>۶۰ تا ۱۰۰</b> ضربان در دقیقه.</p>' +
+        '<p class="legend"><span>مربع کوچک = ۱ میلی‌متر = ۰٫۰۴ ثانیه</span><span>مربع بزرگ = ۵ میلی‌متر = ۰٫۲ ثانیه</span></p>',
+      q: 'در این نوار ۶ ثانیه‌ای، کمپلکس‌های QRS را بشمارید. ریت تقریبی چند ضربان در دقیقه است؟',
+      options: [
+        '۷ کمپلکس × ۱۰ ← ریت ≈ ۷۰',
+        '۹ کمپلکس × ۱۰ ← ریت ≈ ۹۰',
+        '۴ کمپلکس × ۱۰ ← ریت ≈ ۴۰',
+        '۵ کمپلکس × ۱۰ ← ریت ≈ ۵۰'
+      ],
+      correct: 0,
+      explain:
+        'در این نوار <b>۷ کمپلکس QRS</b> در طول ۶ ثانیه دیده می‌شود؛ ۷ × ۱۰ = ۷۰ ضربان در دقیقه. ' +
+        'با روش مربع‌های بزرگ هم فاصله دو R حدود ۴٫۳ مربع بزرگ است و ۳۰۰ ÷ ۴٫۳ ≈ ۷۰ به دست می‌آید. ' +
+        'ریت ۷۰ در محدوده نرمال (۶۰ تا ۱۰۰) قرار دارد.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        var m = svg._meta;
+        m.beats.forEach(function (b) {
+          svg.appendChild(addRect(svg, b - 1.4, b + 2.8, -3, 10, 'rgba(250,204,21,.30)', '#f59e0b'));
+        });
+        svg.appendChild(addLabel(svg, 75, 16,
+          '۷ کمپلکس در ۶ ثانیه ← ریت ≈ ' + fa(m.beats.length * 10) + ' در دقیقه', '#b45309'));
+      }
+    },
+    {
+      id: 2, title: 'گام ۲ — نظم (Regularity)', strip: 'arrhythmia',
+      intro:
+        '<p>پس از ریت، <b>نظم</b> را بررسی کنید: آیا فواصل R-R یکنواخت‌اند؟</p>' +
+        '<ul>' +
+        '<li><b>منظم:</b> همه فواصل R-R تقریباً برابرند.</li>' +
+        '<li><b>نامنظم:</b> فواصل R-R تغییر می‌کنند.</li>' +
+        '</ul>' +
+        '<p>در <b>آریتمی سینوسی</b>، ریتم سینوسی نامنظم است و اختلاف بین طولانی‌ترین و کوتاه‌ترین فاصله RR ' +
+        '<b>بیش از ۰٫۱۶ ثانیه</b> است. این الگو در جوانان و کودکان شایع و اغلب خوش‌خیم است.</p>',
+      q: 'فواصل R-R را در این نوار مقایسه کنید. کدام گزینه صحیح است؟',
+      options: [
+        'کاملاً منظم است؛ اختلاف فواصل ناچیز است.',
+        'نامنظم است و اختلاف طولانی‌ترین و کوتاه‌ترین RR بیش از ۰٫۱۶ ثانیه است.',
+        'نامنظم است اما اختلاف کمتر از ۰٫۱۶ ثانیه است و طبیعی تلقی می‌شود.',
+        'نامنظمی فقط ناشی از نویز دستگاه است و ریتم در واقع منظم است.'
+      ],
+      correct: 1,
+      explain:
+        'در این نوار طولانی‌ترین فاصله RR حدود <b>۱٫۰ ثانیه</b> و کوتاه‌ترین حدود <b>۰٫۷۵ ثانیه</b> است؛ ' +
+        'اختلاف ≈ ۰٫۲۵ ثانیه که از آستانه ۰٫۱۶ ثانیه بیشتر است. ' +
+        'همه موج‌های P مثبت و یکشکل‌اند و قبل از هر QRS قرار دارند، بنابراین این یک <b>آریتمی سینوسی</b> است، نه فیبریلاسیون دهلیزی.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        var m = svg._meta, bs = m.beats;
+        var maxI = 0, minI = 0, maxR = -1, minR = 1e9;
+        for (var i = 0; i < bs.length - 1; i++) {
+          var rr = bs[i + 1] - bs[i];
+          if (rr > maxR) { maxR = rr; maxI = i; }
+          if (rr < minR) { minR = rr; minI = i; }
+        }
+        svg.appendChild(addRect(svg, bs[maxI], bs[maxI + 1], -2, 9, 'rgba(239,68,68,.15)', '#ef4444'));
+        svg.appendChild(addRect(svg, bs[minI], bs[minI + 1], -2, 9, 'rgba(59,130,246,.15)', '#3b82f6'));
+        svg.appendChild(addLabel(svg, bs[maxI] + maxR / 2, 16, 'بلندترین RR ≈ ۱٫۰ ثانیه', '#b91c1c'));
+        svg.appendChild(addLabel(svg, bs[minI] + minR / 2, 16, 'کوتاه‌ترین RR ≈ ۰٫۷۵ ثانیه', '#1d4ed8'));
+        svg.appendChild(addLabel(svg, 75, -6,
+          'اختلاف ≈ ۰٫۲۵ ثانیه (بیشتر از ۰٫۱۶) ← آریتمی سینوسی', '#7c2d12'));
+      }
+    },
+    {
+      id: 3, title: 'گام ۳ — موج P (P wave)', strip: 'nsr',
+      intro:
+        '<p>سینوسی بودن ریتم به <b>موج P</b> وابسته است، نه به ریت یا نظم.</p>' +
+        '<ul>' +
+        '<li>آیا قبل از <b>هر</b> QRS یک موج P وجود دارد؟</li>' +
+        '<li>آیا موج P در لید II <b>مثبت (upright)</b> است؟</li>' +
+        '<li>آیا همه موج‌های P شکل یکسانی دارند؟</li>' +
+        '</ul>' +
+        '<p>معیار اصلی سینوسی بودن: <b>موج P مثبت در لید II قبل از هر QRS با رابطه یک‌به‌یک</b>. ' +
+        'QRS باریک، ریت نرمال و نظم منظم به‌تنهایی سینوسی بودن را ثابت نمی‌کنند (مثلاً ریتم جانکشنال هم QRS باریک دارد).</p>',
+      q: 'کدام یافته در این نوار، سینوسی بودن ریتم را تأیید می‌کند؟',
+      options: [
+        'باریک بودن کمپلکس QRS در تمام لیدها',
+        'وجود موج P مثبت در لید II قبل از هر QRS، با رابطه یک‌به‌یک',
+        'قرار داشتن ریت بین ۶۰ تا ۱۰۰ ضربان در دقیقه',
+        'منظم بودن کامل فواصل R-R'
+      ],
+      correct: 1,
+      explain:
+        'تنها معیار قطعی سینوسی بودن، <b>وجود موج P مثبت در لید II قبل از هر QRS و رابطه یک‌به‌یک بین P و QRS</b> است. ' +
+        'QRS باریک، ریت نرمال و نظم منظم می‌توانند در ریتم‌های غیرسینوسی هم دیده شوند.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        var m = svg._meta;
+        m.beats.forEach(function (b) {
+          var xP = b - m.pr + 1.1;
+          svg.appendChild(addEllipse(svg, xP, 1.3, 12, 16, 'rgba(16,185,129,.16)', '#10b981'));
+        });
+        svg.appendChild(addLabel(svg, 75, 16,
+          'موج P مثبت در لید II، قبل از هر QRS، با رابطه یک‌به‌یک', '#047857'));
+      }
+    },
+    {
+      id: 4, title: 'گام ۴ — فاصله PR (PR interval)', strip: 'brady',
+      intro:
+        '<p><b>فاصله PR</b> از شروع موج P تا شروع کمپلکس QRS اندازه‌گیری می‌شود.</p>' +
+        '<ul>' +
+        '<li>محدوده نرمال: <b>۰٫۱۲ تا ۰٫۲۰ ثانیه</b> (۳ تا ۵ مربع کوچک).</li>' +
+        '<li>PR کوتاه‌تر از ۰٫۱۲ ثانیه → به الگوهایی مانند WPW فکر کنید.</li>' +
+        '<li>PR طولانی‌تر از ۰٫۲۰ ثانیه → بلوک درجه یک دهلیزی-بطنی.</li>' +
+        '</ul>' +
+        '<p>فاصله PR باید در ضربان‌های متوالی <b>ثابت</b> باشد.</p>',
+      q: 'در این نوار، فاصله PR حدود ۰٫۱۸ ثانیه (۴٫۵ مربع کوچک) است. تفسیر شما چیست؟',
+      options: [
+        'کوتاه‌تر از نرمال است و باید به دنبال الگوی WPW گشت.',
+        'در محدوده نرمال (۰٫۱۲ تا ۰٫۲۰ ثانیه) قرار دارد.',
+        'طولانی‌تر از نرمال است و نشانه بلوک درجه یک است.',
+        'اندازه‌گیری PR در این نوار ممکن نیست چون موج P دیده نمی‌شود.'
+      ],
+      correct: 1,
+      explain:
+        'محدوده نرمال PR بین <b>۰٫۱۲ و ۰٫۲۰ ثانیه</b> است. مقدار ۰٫۱۸ ثانیه در این محدوده قرار دارد و ثابت بودن آن در ضربان‌های متوالی، آن را نرمال نگه می‌دارد. ' +
+        'توجه: این نوار از نظر ریت پایین است، اما معیار PR مستقل از ریت ارزیابی می‌شود.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        var m = svg._meta;
+        var b = m.beats[1] || m.beats[0];
+        addBracket(svg, b - m.pr, b, 5, '#2563eb',
+          'فاصله PR ≈ ۰٫۱۸ ثانیه (۴٫۵ مربع کوچک) — نرمال');
+      }
+    },
+    {
+      id: 5, title: 'گام ۵ — عرض QRS (QRS width)', strip: 'wide',
+      intro:
+        '<p>آخرین معیار چک‌لیست، <b>عرض کمپلکس QRS</b> است.</p>' +
+        '<ul>' +
+        '<li>نرمال: <b>کمتر از ۰٫۱۲ ثانیه</b> (کمتر از ۳ مربع کوچک).</li>' +
+        '<li>QRS باریک ← هدایت از مسیر طبیعی دهلیزی-بطنی.</li>' +
+        '<li>QRS پهن (≥ ۰٫۱۲ ثانیه) ← بلوک شاخه‌ای، تأخیر هدایتی، ضربان با منشأ بطنی یا پیش‌برانگیختگی.</li>' +
+        '</ul>' +
+        '<p><b>نکته مهم:</b> QRS پهن به‌تنهایی معنای «ریتم بطنی» ندارد؛ باید همراه با موج P و رابطه آن تفسیر شود.</p>',
+      q: 'در این نوار عرض QRS حدود ۰٫۱۴ ثانیه است. تفسیر صحیح کدام است؟',
+      options: [
+        'طبیعی است، چون از ۰٫۱۲ ثانیه کمتر محسوب می‌شود.',
+        'پهن است (≥ ۰٫۱۲ ثانیه) و نیاز به بررسی بیشتر دارد.',
+        'قطعی‌ترین نشانه تاکی‌کاردی بطنی است.',
+        'عرض QRS هیچ ارتباطی به تفسیر ریتم ندارد.'
+      ],
+      correct: 1,
+      explain:
+        'عرض ۰٫۱۴ ثانیه <b>بیشتر از ۰٫۱۲ ثانیه</b> است، پس QRS پهن محسوب می‌شود. ' +
+        'در این نوار موج P مثبت قبل از هر QRS دیده می‌شود؛ بنابراین ریتم سینوسی است ولی هدایت بطنی تأخیر دارد (مثلاً بلوک شاخه‌ای). ' +
+        'تفکیک دقیق آن از تاکی‌کاردی بطنی <b>نیاز به بازبینی استاد</b> دارد.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        var m = svg._meta;
+        var b = m.beats[2] || m.beats[0];
+        svg.appendChild(addRect(svg, b - 0.7, b + m.wq + 0.7, -3.5, 9,
+          'rgba(249,115,22,.18)', '#f97316'));
+        svg.appendChild(addLabel(svg, 75, 16,
+          'عرض QRS ≈ ۰٫۱۴ ثانیه (۳٫۵ مربع کوچک) → پهن (≥ ۰٫۱۲)', '#c2410c'));
+      }
+    },
+    {
+      id: 6, title: 'گام ۶ — ترکیب: تشخیص نهایی', strip: 'brady',
+      intro:
+        '<p>اکنون همه معیارها را کنار هم می‌گذاریم. ترتیب ثابت را رعایت کنید:</p>' +
+        '<p style="text-align:center;font-weight:800;color:#0f766e">' +
+        'ریت → نظم → موج P → فاصله PR → عرض QRS</p>' +
+        '<p>پس از تکمیل چک‌لیست، <b>تشخیص</b> را بنویسید و سپس در بستر بالینی بپرسید: ' +
+        '«این ریتم برای این بیمار علامت است یا مشکل اولیه؟»</p>' +
+        '<p>یادآوری: تصمیم درمان بر اساس <b>علائم بیمار</b> است، نه صرفاً عدد ریت.</p>',
+      q: 'با اجرای کامل چک‌لیست پنج‌گانه، تشخیص اصلی این نوار چیست؟',
+      options: [
+        'ریتم نرمال سینوسی',
+        'برادی‌کاردی سینوسی',
+        'تاکی‌کاردی سینوسی',
+        'آریتمی سینوسی'
+      ],
+      correct: 1,
+      explain:
+        'ریت ۵۰ (کمتر از ۶۰) + نظم منظم + موج P مثبت قبل از هر QRS + PR نرمال + QRS باریک ← ' +
+        '<b>برادی‌کاردی سینوسی</b>. ' +
+        'در بیمار بدون علامت (فشار خون و سطح هوشیاری نرمال) معمولاً نیازی به مداخله دارویی فوری نیست و پایش کافی است؛ ' +
+        'در بیمار علامت‌دار، آتروپین در الگوریتم برادی‌کاردی علامت‌دار جای دارد.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        var m = svg._meta;
+        m.beats.forEach(function (b) {
+          svg.appendChild(addRect(svg, b - 1.4, b + 2.8, -3, 10, 'rgba(14,165,233,.15)', '#0ea5e9'));
+        });
+        svg.appendChild(addLabel(svg, 75, 16,
+          'ریت ۵۰ + نظم منظم + P مثبت + PR و QRS نرمال → برادی‌کاردی سینوسی', '#0369a1'));
+      }
+    }
+  ];
+
+  var FINAL = [
+    {
+      strip: 'nsr',
+      q: 'نوار ۱ — یافته اصلی این نوار چیست؟',
+      options: ['برادی‌کاردی سینوسی', 'ریتم نرمال سینوسی', 'تاکی‌کاردی سینوسی', 'آریتمی سینوسی'],
+      correct: 1,
+      explain:
+        'ریت ≈ ۷۰ (۷ کمپلکس در ۶ ثانیه)، نظم منظم، موج P مثبت قبل از هر QRS، PR ≈ ۰٫۱۶ ثانیه و QRS باریک. ' +
+        'همه معیارها در محدوده نرمال‌اند ← <b>ریتم نرمال سینوسی</b>.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        svg.appendChild(addLabel(svg, 75, 16, 'NSR — ریت ۷۰، منظم، P مثبت، PR و QRS نرمال', '#047857'));
+      }
+    },
+    {
+      strip: 'brady',
+      q: 'نوار ۲ — یافته اصلی این نوار چیست؟',
+      options: ['تاکی‌کاردی سینوسی', 'آریتمی سینوسی', 'برادی‌کاردی سینوسی', 'ریتم نرمال سینوسی'],
+      correct: 2,
+      explain:
+        'ریت ≈ ۵۰ (۵ کمپلکس در ۶ ثانیه)، نظم منظم، موج P مثبت قبل از هر QRS، PR ≈ ۰٫۱۸ ثانیه و QRS باریک ← ' +
+        '<b>برادی‌کاردی سینوسی</b>. توجه: در ورزشکار بدون علامت می‌تواند طبیعی باشد و درمان بر اساس علائم است.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        svg.appendChild(addLabel(svg, 75, 16, 'برادی‌کاردی سینوسی — ریت ≈ ۵۰', '#0369a1'));
+      }
+    },
+    {
+      strip: 'tachy',
+      q: 'نوار ۳ — یافته اصلی این نوار چیست؟',
+      options: ['تاکی‌کاردی سینوسی', 'برادی‌کاردی سینوسی', 'آریتمی سینوسی', 'ریتم نرمال سینوسی'],
+      correct: 0,
+      explain:
+        'ریت ≈ ۱۳۰ (۱۳ کمپلکس در ۶ ثانیه)، نظم منظم، موج P مثبت قبل از هر QRS (ممکن است به T قبلی نزدیک شده باشد)، ' +
+        'PR ≈ ۰٫۱۴ و QRS باریک ← <b>تاکی‌کاردی سینوسی</b>. ' +
+        'این ریتم معمولاً <b>جبرانی</b> است؛ ابتدا علت زمینه‌ای (درد، تب، هیپوولمی، هیپوکسی، سپسیس) را جستجو کنید، نه کاهش صرف ریت.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        svg.appendChild(addLabel(svg, 75, 16, 'تاکی‌کاردی سینوسی — ریت ≈ ۱۳۰', '#b45309'));
+      }
+    },
+    {
+      strip: 'arrhythmia',
+      q: 'نوار ۴ — یافته اصلی این نوار چیست؟',
+      options: ['ریتم نرمال سینوسی', 'تاکی‌کاردی سینوسی', 'آریتمی سینوسی', 'برادی‌کاردی سینوسی'],
+      correct: 2,
+      explain:
+        'موج P مثبت قبل از هر QRS وجود دارد (پس سینوسی است) اما فواصل R-R متفاوت‌اند و اختلاف طولانی‌ترین و کوتاه‌ترین RR ' +
+        'حدود ۰٫۲۵ ثانیه (بیشتر از ۰٫۱۶) است ← <b>آریتمی سینوسی</b>. ' +
+        'در جوانان و کودکان شایع و اغلب خوش‌خیم است و نباید با فیبریلاسیون دهلیزی اشتباه شود.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        svg.appendChild(addLabel(svg, 75, 16, 'آریتمی سینوسی — اختلاف RR بیش از ۰٫۱۶ ثانیه', '#7c2d12'));
+      }
+    },
+    {
+      strip: 'wide',
+      q: 'نوار ۵ — یافته اصلی این نوار چیست؟',
+      options: ['ریتم نرمال سینوسی با QRS باریک', 'تاکی‌کاردی سینوسی با QRS پهن', 'برادی‌کاردی سینوسی', 'آریتمی سینوسی'],
+      correct: 1,
+      explain:
+        'ریت ≈ ۱۲۰، نظم منظم، موج P مثبت قبل از هر QRS ← ریتم از نظر منشأ <b>سینوسی</b> است. ' +
+        'اما عرض QRS ≈ ۰٫۱۴ ثانیه (پهن) است. QRS پهن در یک ریتم سینوسی می‌تواند ناشی از بلوک شاخه‌ای یا تأخیر هدایتی باشد، ' +
+        'نه لزوماً ریتم بطنی. تفکیک قطعی این نوار از تاکی‌کاردی بطنی <b>نیاز به بازبینی استاد</b> دارد.',
+      annotate: function (svg) {
+        if (svg.dataset.ann) return; svg.dataset.ann = '1';
+        var m = svg._meta;
+        var b = m.beats[1] || m.beats[0];
+        svg.appendChild(addRect(svg, b - 0.7, b + m.wq + 0.7, -3.5, 9,
+          'rgba(249,115,22,.18)', '#f97316'));
+        svg.appendChild(addLabel(svg, 75, 16,
+          'تاکی‌کاردی سینوسی با QRS پهن (≈ ۰٫۱۴ ثانیه) — نیاز به بازبینی استاد', '#c2410c'));
+      }
+    }
+  ];
+
+  var KEY = 'sinus_ecg_progress_v1';
+  var state = { steps: {}, final: {} };
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        state.steps = parsed.steps || {};
+        state.final = parsed.final || {};
+      }
+    }
+  } catch (e) { state = { steps: {}, final: {} }; }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function updateProgress() {
+    var total = SECTIONS.length + FINAL.length;
+    var done = 0, correct = 0;
+    SECTIONS.forEach(function (s) {
+      var st = state.steps[s.id];
+      if (st) { done++; if (st.ok) correct++; }
+    });
+    FINAL.forEach(function (f, i) {
+      var st = state.final[i];
+      if (st) { done++; if (st.ok) correct++; }
+    });
+    var pct = Math.round((done / total) * 100);
+    var bar = document.getElementById('bar');
+    var pctEl = document.getElementById('pct');
+    var scoreEl = document.getElementById('score');
+    if (bar) bar.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = fa(pct) + '٪';
+    if (scoreEl) scoreEl.textContent = 'درست: ' + fa(correct) + ' از ' + fa(done);
+  }
+
+  function showFeedback(el, ok, text) {
+    el.className = 'feedback show ' + (ok ? 'ok' : 'bad');
+    el.innerHTML =
+      '<div class="fb-head">' + (ok ? '✅ آفرین! پاسخ درست است.' : '❌ پاسخ درست نبود.') + '</div>' +
+      '<div class="fb-body">' + text + '</div>';
+  }
+
+  function wireOptions(cfg) {
+    var optHost = cfg.optHost, fbEl = cfg.fbEl, svg = cfg.svg;
+    var options = cfg.options, correct = cfg.correct;
+    var explain = cfg.explain, annotate = cfg.annotate;
+    var stateObj = cfg.stateObj, stateKey = cfg.stateKey;
+
+    function markAll() {
+      Array.prototype.forEach.call(optHost.children, function (c, j) {
+        c.disabled = true;
+        if (j === correct) c.classList.add('correct');
+      });
+    }
+    function finish() {
+      markAll();
+      showFeedback(fbEl, true, explain);
+      if (annotate) annotate(svg);
+      var card = optHost.closest('.card');
+      if (card) {
+        card.classList.add('solved');
+        var t = card.querySelector('.tick');
+        if (t) t.classList.add('show');
+      }
+    }
+    function fail(chosen) {
+      Array.prototype.forEach.call(optHost.children, function (c, j) {
+        c.disabled = true;
+        if (j === correct) c.classList.add('correct');
+        if (j === chosen) c.classList.add('wrong');
+      });
+      showFeedback(fbEl, false, explain);
+      if (annotate) annotate(svg);
+      var card = optHost.closest('.card');
+      if (card) card.classList.add('solved');
+    }
+
+    options.forEach(function (opt, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opt';
+      b.innerHTML = '<span class="letter">' + 'ABCD'[i] + '</span><span class="txt">' + opt + '</span>';
+      b.addEventListener('click', function () {
+        if (optHost.dataset.locked === '1') return;
+        optHost.dataset.locked = '1';
+        var ok = (i === correct);
+        stateObj[stateKey] = { chosen: i, ok: ok };
+        save();
+        updateProgress();
+        if (ok) finish(); else fail(i);
+      });
+      optHost.appendChild(b);
+    });
+
+    var prev = stateObj[stateKey];
+    if (prev) {
+      optHost.dataset.locked = '1';
+      if (prev.ok) finish(); else fail(prev.chosen);
+    }
+  }
+
+  function buildStep(sec) {
+    var el = document.createElement('section');
+    el.className = 'card step';
+    el.id = 'step-' + sec.id;
+    el.innerHTML =
+      '<div class="step-head">' +
+        '<span class="num">' + fa(sec.id) + '</span>' +
+        '<h2>' + sec.title + '</h2>' +
+        '<span class="tick" id="tick-' + sec.id + '">✓</span>' +
+      '</div>' +
+      '<div class="prose">' + sec.intro + '</div>' +
+      '<div class="strip-wrap">' +
+        '<svg class="strip" id="svg-' + sec.id + '" role="img" aria-label="نوار قلب نمونه گام ' + fa(sec.id) + '"></svg>' +
+      '</div>' +
+      '<p class="hint">در موبایل برای دیدن کل نوار، افقی اسکرول کنید.</p>' +
+      '<div class="quiz">' +
+        '<p class="qtext"><b>خودآزمایی:</b> ' + sec.q + '</p>' +
+        '<div class="options" id="opt-' + sec.id + '"></div>' +
+        '<div class="feedback" id="fb-' + sec.id + '"></div>' +
+      '</div>';
+    var svg = el.querySelector('svg');
+    renderStrip(svg, CFG[sec.strip], 's' + sec.id);
+    wireOptions({
+      optHost: el.querySelector('.options'),
+      fbEl: el.querySelector('.feedback'),
+      svg: svg,
+      options: sec.options, correct: sec.correct, explain: sec.explain,
+      annotate: sec.annotate, stateObj: state.steps, stateKey: sec.id
+    });
+    return el;
+  }
+
+  function buildFinalItem(item, idx) {
+    var el = document.createElement('div');
+    el.className = 'mini';
+    el.id = 'final-' + idx;
+    el.innerHTML =
+      '<h3>نوار ' + fa(idx + 1) + '</h3>' +
+      '<div class="strip-wrap">' +
+        '<svg class="strip" id="fsvg-' + idx + '" role="img" aria-label="نوار قلب تمرین ' + fa(idx + 1) + '"></svg>' +
+      '</div>' +
+      '<p class="hint">در موبایل برای دیدن کل نوار، افقی اسکرول کنید.</p>' +
+      '<p class="qtext">' + item.q + '</p>' +
+      '<div class="options" id="fopt-' + idx + '"></div>' +
+      '<div class="feedback" id="ffb-' + idx + '"></div>';
+    var svg = el.querySelector('svg');
+    renderStrip(svg, CFG[item.strip], 'f' + idx);
+    wireOptions({
+      optHost: el.querySelector('.options'),
+      fbEl: el.querySelector('.feedback'),
+      svg: svg,
+      options: item.options, correct: item.correct, explain: item.explain,
+      annotate: item.annotate, stateObj: state.final, stateKey: idx
+    });
+    return el;
+  }
+
+  function init() {
+    var stepsHost = document.getElementById('steps');
+    SECTIONS.forEach(function (sec) { stepsHost.appendChild(buildStep(sec)); });
+    var finalHost = document.getElementById('final-list');
+    FINAL.forEach(function (item, idx) { finalHost.appendChild(buildFinalItem(item, idx)); });
+    var resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        try { localStorage.removeItem(KEY); } catch (e) {}
+        window.location.reload();
+      });
+    }
+    updateProgress();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+</body>
+</html>
